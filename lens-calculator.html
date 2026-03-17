@@ -1,0 +1,1811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lens & Throw Calculator</title>
+<style>
+/* ─── THEME VARIABLES ───────────────────────────────────────────────── */
+:root {
+  --bg:        #000;
+  --surface:   #0a0a0a;
+  --surface2:  #111;
+  --border:    #1a1a1a;
+  --border2:   #2a2a2a;
+  --text:      #d4d4d4;
+  --text-hi:   #fff;
+  --text-mid:  #777;
+  --text-lo:   #555;
+  --ok:        #6dbb6d;
+  --warn:      #cc6644;
+  --accent:    #fff;
+  --accent-fg: #000;
+  --in-bg:     #111;
+  --in-bd:     #1e1e1e;
+  --in-bdf:    #3a3a3a;
+  --in-txt:    #ddd;
+  --px-empty:  #1a1a1a;
+  --px-bleed:  #2a1a0a;
+}
+[data-theme="light"] {
+  --bg:        #efefed;
+  --surface:   #fff;
+  --surface2:  #f5f5f3;
+  --border:    #e0e0dc;
+  --border2:   #c8c8c4;
+  --text:      #1a1a1a;
+  --text-hi:   #000;
+  --text-mid:  #555;
+  --text-lo:   #999;
+  --ok:        #2a8c2a;
+  --warn:      #c04020;
+  --accent:    #111;
+  --accent-fg: #fff;
+  --in-bg:     #fff;
+  --in-bd:     #d0d0cc;
+  --in-bdf:    #888;
+  --in-txt:    #111;
+  --px-empty:  #ddd;
+  --px-bleed:  #e8c8a0;
+}
+
+/* ─── RESET & BASE ─────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 12px;
+  background: var(--bg);
+  color: var(--text);
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ─── HEADER ───────────────────────────────────────────────────────── */
+.app-header {
+  height: 44px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  gap: 12px;
+  flex-shrink: 0;
+}
+.brand {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--text-lo);
+  white-space: nowrap;
+  text-transform: uppercase;
+}
+.project-inline {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  font-size: 0.82rem;
+  font-weight: 500;
+  outline: none;
+  padding: 2px 0;
+  width: 160px;
+  font-family: inherit;
+}
+.project-inline::placeholder { color: var(--text-lo); }
+.project-inline:focus { border-bottom-color: var(--text-mid); }
+
+.hdr-sep { width: 1px; height: 20px; background: var(--border); flex-shrink: 0; }
+.hdr-spacer { flex: 1; }
+
+/* Fit pills in header */
+.hdr-pills { display: flex; gap: 3px; }
+.hdr-pill {
+  padding: 3px 10px;
+  background: transparent;
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  color: var(--text-lo);
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.12s;
+}
+.hdr-pill:hover { border-color: var(--text-mid); color: var(--text-mid); }
+.hdr-pill.active { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); }
+
+/* Action buttons */
+.hdr-btn {
+  padding: 4px 12px;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  color: var(--text-mid);
+  font-size: 0.68rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+}
+.hdr-btn:hover { border-color: var(--text-mid); color: var(--text); }
+.hdr-btn.done { color: var(--text-lo); }
+.hdr-btn-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-fg);
+}
+.hdr-btn-primary:hover { opacity: 0.85; }
+.hdr-btn-primary.done { background: var(--surface2); border-color: var(--surface2); color: var(--text-lo); }
+
+/* Theme toggle */
+.theme-toggle {
+  padding: 4px 8px;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  color: var(--text-lo);
+  font-size: 0.75rem;
+  cursor: pointer;
+  line-height: 1;
+}
+.theme-toggle:hover { border-color: var(--text-mid); color: var(--text-mid); }
+
+.date-hdr {
+  font-size: 0.6rem;
+  color: var(--text-lo);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* ─── APP BODY ─────────────────────────────────────────────────────── */
+.app-body {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+/* ─── SIDEBAR ──────────────────────────────────────────────────────── */
+.sidebar {
+  width: 252px;
+  flex-shrink: 0;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 10px 10px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.s-title {
+  font-size: 0.57rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-lo);
+  padding: 9px 0 5px;
+  border-top: 1px solid var(--border);
+  margin-top: 4px;
+}
+.s-title:first-child { border-top: none; padding-top: 2px; margin-top: 0; }
+
+.s-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 4px;
+}
+.s-lbl {
+  font-size: 0.62rem;
+  color: var(--text-mid);
+  min-width: 50px;
+  text-align: right;
+  flex-shrink: 0;
+  line-height: 1.3;
+}
+.s-unit {
+  font-size: 0.6rem;
+  color: var(--text-lo);
+  flex-shrink: 0;
+  min-width: 18px;
+}
+
+input.s-in, select.s-in {
+  flex: 1;
+  min-width: 0;
+  background: var(--in-bg);
+  border: 1px solid var(--in-bd);
+  border-radius: 3px;
+  padding: 3px 6px;
+  color: var(--in-txt);
+  font-size: 0.78rem;
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  outline: none;
+}
+input.s-in:focus, select.s-in:focus { border-color: var(--in-bdf); }
+input.s-in[type="number"] { -moz-appearance: textfield; }
+input.s-in[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
+select.s-in { cursor: pointer; appearance: none; -webkit-appearance: none; }
+
+/* Lens mode mini-tabs */
+.lens-modes { display: flex; gap: 2px; margin-bottom: 6px; }
+.lens-mode-btn {
+  flex: 1;
+  padding: 3px 0;
+  background: var(--in-bg);
+  border: 1px solid var(--in-bd);
+  border-radius: 3px;
+  color: var(--text-lo);
+  font-size: 0.6rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: center;
+}
+.lens-mode-btn:hover { color: var(--text-mid); }
+.lens-mode-btn.active { border-color: var(--text-mid); color: var(--text); background: var(--surface2); }
+
+/* Result rows */
+.r-group { margin-top: 2px; }
+.r-big-wrap { text-align: center; padding: 6px 0 4px; }
+.r-big {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text-hi);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+.r-big-sub { font-size: 0.62rem; color: var(--text-mid); margin-top: 2px; font-variant-numeric: tabular-nums; }
+.r-big-lbl { font-size: 0.55rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-lo); margin-bottom: 2px; }
+
+.r-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 3px 0;
+  border-bottom: 1px solid var(--border);
+}
+.r-row:last-child { border-bottom: none; }
+.r-lbl { font-size: 0.62rem; color: var(--text-mid); }
+.r-val { font-size: 0.75rem; font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; text-align: right; }
+.r-val.hl { color: var(--text-hi); }
+.r-val.ok { color: var(--ok); }
+.r-val.warn { color: var(--warn); }
+
+/* Pixel bar */
+.px-bar-wrap { height: 5px; background: var(--px-empty); border-radius: 3px; overflow: hidden; display: flex; margin: 5px 0 6px; }
+.px-bar-a { height: 100%; background: var(--accent); transition: width 0.25s; }
+.px-bar-b { height: 100%; background: var(--px-bleed); transition: width 0.25s; }
+
+/* Status badge */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.6rem;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 3px;
+  margin-left: 4px;
+}
+.badge-ok { background: rgba(109,187,109,0.1); color: var(--ok); border: 1px solid rgba(109,187,109,0.2); }
+.badge-warn { background: rgba(204,102,68,0.1); color: var(--warn); border: 1px solid rgba(204,102,68,0.2); }
+
+/* ─── CANVAS AREA ──────────────────────────────────────────────────── */
+.canvas-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  overflow: hidden;
+  min-width: 0;
+}
+
+.canvas-tabs {
+  height: 34px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  gap: 0;
+  flex-shrink: 0;
+}
+.c-tab {
+  padding: 0 14px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-lo);
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  font-family: inherit;
+  transition: color 0.15s, border-color 0.15s;
+}
+.c-tab:hover { color: var(--text-mid); }
+.c-tab.active { color: var(--text-hi); border-bottom-color: var(--text-hi); }
+
+.canvas-wrapper {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+#mainCanvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Info bar below canvas */
+.canvas-info {
+  height: 30px;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 24px;
+  flex-shrink: 0;
+}
+.ci-item { display: flex; align-items: baseline; gap: 5px; }
+.ci-lbl { font-size: 0.57rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-lo); }
+.ci-val { font-size: 0.7rem; font-weight: 600; color: var(--text-mid); font-variant-numeric: tabular-nums; }
+.ci-val.bright { color: var(--text); }
+
+/* Scrollbar */
+.sidebar::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-track { background: transparent; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+/* ─── LENS SHIFT PANEL ─────────────────────────────────────────────── */
+.ls-panel { display: none; }
+.ls-panel.visible { display: block; }
+.db-load-btn {
+  width: 100%;
+  padding: 4px 0;
+  background: var(--in-bg);
+  border: 1px solid var(--border2);
+  border-radius: 3px;
+  color: var(--text-mid);
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  font-family: inherit;
+  margin-bottom: 5px;
+}
+.db-load-btn:hover { border-color: var(--text-mid); color: var(--text); }
+.db-status { font-size: 0.6rem; color: var(--text-mid); margin-bottom: 5px; min-height: 14px; }
+.db-status.ok  { color: var(--ok); }
+.db-status.err { color: var(--warn); }
+.shift-vis { height: 4px; background: var(--border); border-radius: 2px; margin: 5px 0; position: relative; overflow: visible; }
+.shift-vis-track { height: 100%; background: var(--border); border-radius: 2px; position: relative; }
+.shift-vis-range { position: absolute; height: 100%; background: rgba(109,187,109,0.2); border-radius: 2px; }
+.shift-vis-needle {
+  position: absolute; top: -3px; width: 2px; height: 10px;
+  background: var(--text-hi); border-radius: 1px; transform: translateX(-50%);
+}
+.warn-note {
+  font-size: 0.58rem; color: var(--text-mid); line-height: 1.4;
+  border: 1px solid var(--border2); border-radius: 3px;
+  padding: 4px 6px; margin-bottom: 6px;
+}
+</style>
+</head>
+<body>
+
+<!-- ─── HEADER ────────────────────────────────────────────────────── -->
+<header class="app-header">
+  <span class="brand">Lens & Throw</span>
+  <div class="hdr-sep"></div>
+  <input class="project-inline" id="projectName" type="text" placeholder="Project name" spellcheck="false">
+  <div class="hdr-sep"></div>
+
+  <!-- Fit mode pills -->
+  <div class="hdr-pills">
+    <button class="hdr-pill active" data-lock="width">Lock Width</button>
+    <button class="hdr-pill" data-lock="height">Lock Height</button>
+    <button class="hdr-pill" data-lock="fit">Fit Both</button>
+  </div>
+
+  <div class="hdr-spacer"></div>
+  <span class="date-hdr" id="dateStamp"></span>
+  <div class="hdr-sep"></div>
+  <button class="hdr-btn" id="copySpecBtn">Copy Spec</button>
+  <button class="hdr-btn hdr-btn-primary" id="screenshotBtn">Save PNG</button>
+  <button class="theme-toggle" id="themeToggle" title="Toggle light/dark mode">☀︎</button>
+</header>
+
+<!-- ─── APP BODY ──────────────────────────────────────────────────── -->
+<div class="app-body">
+
+  <!-- ─── SIDEBAR ─────────────────────────────────────────────────── -->
+  <aside class="sidebar">
+
+    <!-- Wall -->
+    <div class="s-title">Wall</div>
+    <div class="s-row">
+      <span class="s-lbl">Width</span>
+      <input class="s-in" type="number" id="wallW" value="6" min="0" step="any">
+      <span class="s-unit" id="unitW">m</span>
+    </div>
+    <div class="s-row">
+      <span class="s-lbl">Height</span>
+      <input class="s-in" type="number" id="wallH" value="4" min="0" step="any">
+      <span class="s-unit" id="unitH">m</span>
+    </div>
+    <div class="s-row">
+      <span class="s-lbl">Unit</span>
+      <select class="s-in" id="unit">
+        <option value="m">Meters</option>
+        <option value="cm">Centimeters</option>
+        <option value="ft">Feet</option>
+        <option value="in">Inches</option>
+      </select>
+    </div>
+
+    <!-- Projector -->
+    <div class="s-title">Projector</div>
+    <div class="s-row">
+      <span class="s-lbl">Preset</span>
+      <select class="s-in" id="projPreset">
+        <option value="">Custom</option>
+        <option value="1024,768">XGA 1024×768</option>
+        <option value="1280,800">WXGA 1280×800</option>
+        <option value="1280,720">HD 720p</option>
+        <option value="1920,1080">FHD 1080p</option>
+        <option value="1920,1200" selected>WUXGA 1920×1200</option>
+        <option value="2560,1600">WQXGA 2560×1600</option>
+        <option value="3840,2160">4K UHD</option>
+        <option value="4096,2160">4K DCI</option>
+      </select>
+    </div>
+    <div class="s-row">
+      <span class="s-lbl">Width</span>
+      <input class="s-in" type="number" id="projW" value="1920" min="1" step="1">
+      <span class="s-unit">px</span>
+    </div>
+    <div class="s-row">
+      <span class="s-lbl">Height</span>
+      <input class="s-in" type="number" id="projH" value="1200" min="1" step="1">
+      <span class="s-unit">px</span>
+    </div>
+
+    <!-- Lens -->
+    <div class="s-title">Lens</div>
+    <div class="lens-modes">
+      <button class="lens-mode-btn active" data-lmode="single">Single</button>
+      <button class="lens-mode-btn" data-lmode="range">Zoom</button>
+      <button class="lens-mode-btn" data-lmode="preset">Preset</button>
+    </div>
+
+    <div id="lens-single">
+      <div class="s-row">
+        <span class="s-lbl">Ratio</span>
+        <input class="s-in" type="number" id="trSingle" value="1.5" min="0.01" step="0.01">
+        <span class="s-unit">:1</span>
+      </div>
+    </div>
+
+    <div id="lens-range" style="display:none">
+      <div class="s-row">
+        <span class="s-lbl">Min ratio</span>
+        <input class="s-in" type="number" id="trMin" value="1.2" min="0.01" step="0.01">
+        <span class="s-unit">:1</span>
+      </div>
+      <div class="s-row">
+        <span class="s-lbl">Max ratio</span>
+        <input class="s-in" type="number" id="trMax" value="1.8" min="0.01" step="0.01">
+        <span class="s-unit">:1</span>
+      </div>
+    </div>
+
+    <div id="lens-preset" style="display:none">
+      <div class="s-row">
+        <span class="s-lbl">Lens</span>
+        <select class="s-in" id="lensPresetSel">
+          <optgroup label="Ultra Short">
+            <option value="0.25,">UST 0.25:1</option>
+            <option value="0.35,">UST 0.35:1</option>
+          </optgroup>
+          <optgroup label="Short">
+            <option value="0.6,">0.6:1 Fixed</option>
+            <option value="0.65,0.85">0.65–0.85:1</option>
+            <option value="0.8,1.0">0.80–1.0:1</option>
+          </optgroup>
+          <optgroup label="Standard">
+            <option value="1.0,1.3">1.0–1.3:1</option>
+            <option value="1.2,1.8" selected>1.2–1.8:1</option>
+            <option value="1.5,2.0">1.5–2.0:1</option>
+          </optgroup>
+          <optgroup label="Long">
+            <option value="2.0,3.0">2.0–3.0:1</option>
+            <option value="2.6,4.0">2.6–4.0:1</option>
+            <option value="3.5,5.5">3.5–5.5:1</option>
+            <option value="5.0,8.0">5.0–8.0:1</option>
+            <option value="7.0,11.0">7.0–11.0:1</option>
+          </optgroup>
+        </select>
+      </div>
+    </div>
+
+    <!-- Room depth (shared) -->
+    <div class="s-row" style="margin-top:2px">
+      <span class="s-lbl">Room depth</span>
+      <input class="s-in" type="number" id="roomDepth" value="" min="0" step="any" placeholder="—">
+      <span class="s-unit" id="roomUnit">m</span>
+    </div>
+
+    <!-- Throw distance result -->
+    <div class="s-title">Throw Distance</div>
+    <div class="r-big-wrap">
+      <div class="r-big-lbl">Distance</div>
+      <div class="r-big" id="throwVal">—</div>
+      <div class="r-big-sub" id="throwSub"></div>
+    </div>
+
+    <!-- Key results -->
+    <div class="s-title">Results</div>
+    <div class="r-group">
+      <div class="r-row">
+        <span class="r-lbl">Image size</span>
+        <span class="r-val hl" id="rImageSize">—</span>
+      </div>
+      <div class="r-row">
+        <span class="r-lbl">Pixel density</span>
+        <span class="r-val" id="rPxDensity">—</span>
+      </div>
+      <div class="r-row">
+        <span class="r-lbl">mm / pixel</span>
+        <span class="r-val" id="rMmPx">—</span>
+      </div>
+      <div class="r-row">
+        <span class="r-lbl">Wall AR</span>
+        <span class="r-val" id="rWallAR">—</span>
+      </div>
+      <div class="r-row">
+        <span class="r-lbl">Proj AR</span>
+        <span class="r-val" id="rProjAR">—</span>
+      </div>
+      <div class="r-row">
+        <span class="r-lbl">Wall coverage</span>
+        <span class="r-val" id="rCoverage">—</span>
+      </div>
+      <div class="r-row" id="rowRoom" style="display:none">
+        <span class="r-lbl">Room depth</span>
+        <span class="r-val" id="rRoom">—</span>
+      </div>
+    </div>
+
+    <!-- Pixel accounting -->
+    <div class="s-title">Pixel Accounting</div>
+    <div class="px-bar-wrap">
+      <div class="px-bar-a" id="pxBarA" style="width:0%"></div>
+      <div class="px-bar-b" id="pxBarB" style="width:0%"></div>
+    </div>
+    <div class="r-group">
+      <div class="r-row">
+        <span class="r-lbl">Active (on wall)</span>
+        <span class="r-val hl" id="pxActive">—</span>
+      </div>
+      <div class="r-row" id="rowBleed" style="display:none">
+        <span class="r-lbl">Bleed (outside)</span>
+        <span class="r-val warn" id="pxBleed">—</span>
+      </div>
+      <div class="r-row" id="rowMargin" style="display:none">
+        <span class="r-lbl">Wall margin</span>
+        <span class="r-val" id="pxMargin">—</span>
+      </div>
+      <div class="r-row">
+        <span class="r-lbl">Utilization</span>
+        <span class="r-val hl" id="pxUtil">—</span>
+      </div>
+      <div class="r-row" id="rowBleedDetail" style="display:none">
+        <span class="r-lbl">Bleed detail</span>
+        <span class="r-val warn" id="pxBleedDetail">—</span>
+      </div>
+    </div>
+
+    <!-- ─── LENS SHIFT PANEL (shown only when Lens Shift tab is active) ─── -->
+    <div class="ls-panel" id="lsPanel">
+
+      <div class="s-title">Projector Database</div>
+      <div class="warn-note">⚠ Verify specs against manufacturer datasheets before on-site use.</div>
+      <button class="db-load-btn" id="loadDbBtn">Load projectors.json</button>
+      <input type="file" id="dbFileInput" accept=".json" style="display:none">
+      <div class="db-status" id="dbStatus">No database loaded</div>
+
+      <div class="s-row">
+        <span class="s-lbl">Projector</span>
+        <select class="s-in" id="projectorSel" disabled>
+          <option value="">— load DB —</option>
+        </select>
+      </div>
+      <div class="s-row">
+        <span class="s-lbl">Lens</span>
+        <select class="s-in" id="lensDbSel" disabled>
+          <option value="">— select projector —</option>
+        </select>
+      </div>
+      <div id="lensSpecDisplay" style="display:none">
+        <div class="r-row" style="margin-top:3px">
+          <span class="r-lbl">Throw ratio</span>
+          <span class="r-val" id="lsThrowSpec">—</span>
+        </div>
+        <div class="r-row">
+          <span class="r-lbl">V shift ↑ max</span>
+          <span class="r-val ok" id="lsVUp">—</span>
+        </div>
+        <div class="r-row">
+          <span class="r-lbl">V shift ↓ max</span>
+          <span class="r-val" id="lsVDown">—</span>
+        </div>
+        <div class="r-row">
+          <span class="r-lbl">H shift ± max</span>
+          <span class="r-val" id="lsH">—</span>
+        </div>
+      </div>
+
+      <div class="s-title">Room Geometry</div>
+      <div class="s-row">
+        <span class="s-lbl">Proj height</span>
+        <input class="s-in" type="number" id="projFloorH" value="3.0" min="0" step="0.05">
+        <span class="s-unit">m</span>
+      </div>
+      <div class="s-row">
+        <span class="s-lbl">Screen bottom</span>
+        <input class="s-in" type="number" id="screenBottom" value="0.5" min="0" step="0.05">
+        <span class="s-unit">m</span>
+      </div>
+      <div class="s-row">
+        <span class="s-lbl">Screen top</span>
+        <input class="s-in" type="number" id="screenTop" value="4.5" min="0" step="0.05">
+        <span class="s-unit">m</span>
+      </div>
+      <div class="s-row">
+        <span class="s-lbl">H offset</span>
+        <input class="s-in" type="number" id="projHOffset" value="0" step="0.05" placeholder="0 = centered">
+        <span class="s-unit">m</span>
+      </div>
+
+      <div class="s-title">Shift Required</div>
+      <div class="r-group">
+        <div class="r-row">
+          <span class="r-lbl">V shift needed</span>
+          <span class="r-val hl" id="lsVNeeded">—</span>
+        </div>
+        <div class="r-row">
+          <span class="r-lbl">V shift %</span>
+          <span class="r-val" id="lsVPct">—</span>
+        </div>
+        <div class="r-row">
+          <span class="r-lbl">V clearance</span>
+          <span class="r-val" id="lsVClear">—</span>
+        </div>
+        <div class="r-row">
+          <span class="r-lbl">H shift needed</span>
+          <span class="r-val" id="lsHNeeded">—</span>
+        </div>
+        <div class="r-row">
+          <span class="r-lbl">H shift %</span>
+          <span class="r-val" id="lsHPct">—</span>
+        </div>
+        <div class="r-row">
+          <span class="r-lbl">Status</span>
+          <span class="r-val" id="lsStatus">—</span>
+        </div>
+      </div>
+
+      <!-- Shift position visual bar -->
+      <div style="margin-top:8px; font-size:0.58rem; color:var(--text-mid); margin-bottom:3px; text-transform:uppercase; letter-spacing:0.06em;">Vertical shift range</div>
+      <div style="position:relative; height:16px; background:var(--in-bg); border-radius:3px; overflow:hidden; border:1px solid var(--border2);">
+        <!-- Available range green zone -->
+        <div id="lsRangeBar" style="position:absolute;height:100%;background:rgba(109,187,109,0.18);border-radius:2px;"></div>
+        <!-- Center mark -->
+        <div style="position:absolute;left:50%;top:0;width:1px;height:100%;background:var(--border2);"></div>
+        <!-- Needed position needle -->
+        <div id="lsNeedle" style="position:absolute;top:2px;width:2px;height:12px;background:var(--text-hi);border-radius:1px;transform:translateX(-50%);display:none;"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:0.6rem;color:var(--text-mid);margin-top:3px;">
+        <span id="lsBarDownLabel">↓</span>
+        <span style="color:var(--text-lo)">0%</span>
+        <span id="lsBarUpLabel">↑</span>
+      </div>
+
+    </div>
+    <!-- ─── END LENS SHIFT PANEL ────────────────────────────────────── -->
+
+  </aside>
+
+  <!-- ─── CANVAS AREA ───────────────────────────────────────────── -->
+  <div class="canvas-area">
+
+    <div class="canvas-tabs">
+      <button class="c-tab active" data-view="pixmap">Pixel Map</button>
+      <button class="c-tab" data-view="front">Front View</button>
+      <button class="c-tab" data-view="top">Top View</button>
+      <button class="c-tab" data-view="lensshift">Lens Shift</button>
+    </div>
+
+    <div class="canvas-wrapper" id="canvasWrapper">
+      <canvas id="mainCanvas"></canvas>
+    </div>
+
+    <div class="canvas-info">
+      <div class="ci-item">
+        <span class="ci-lbl">Throw</span>
+        <span class="ci-val bright" id="ciThrow">—</span>
+      </div>
+      <div class="ci-item">
+        <span class="ci-lbl">Image</span>
+        <span class="ci-val bright" id="ciImage">—</span>
+      </div>
+      <div class="ci-item">
+        <span class="ci-lbl">Density</span>
+        <span class="ci-val" id="ciDensity">—</span>
+      </div>
+      <div class="ci-item">
+        <span class="ci-lbl">Utilization</span>
+        <span class="ci-val bright" id="ciUtil">—</span>
+      </div>
+      <div class="ci-item">
+        <span class="ci-lbl">Fit mode</span>
+        <span class="ci-val" id="ciFit">—</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+'use strict';
+
+// ─────────────────────────────── HELPERS ───────────────────────────────
+
+const $ = id => document.getElementById(id);
+const fmt = n => Math.round(n).toLocaleString('en-US');
+const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+
+function gcd(a, b) { a = Math.round(a); b = Math.round(b); while (b) { [a, b] = [b, a % b]; } return a || 1; }
+
+function toMeters(val, unit) {
+  return val * ({ m: 1, cm: 0.01, mm: 0.001, ft: 0.3048, in: 0.0254 }[unit] || 1);
+}
+function fmtDist(m) {
+  if (m < 0.01) return `${(m * 1000).toFixed(1)} mm`;
+  if (m < 1)    return `${(m * 100).toFixed(1)} cm`;
+  return `${m.toFixed(2)} m`;
+}
+function toImperial(m) {
+  const ti = m / 0.0254;
+  const ft = Math.floor(ti / 12), i = ti % 12;
+  return ft === 0 ? `${i.toFixed(1)}"` : `${ft}' ${i.toFixed(1)}"`;
+}
+
+// ─────────────────────────────── STATE ─────────────────────────────────
+
+let lockMode = 'width';
+let lensMode = 'single';
+let activeView = 'pixmap';
+
+// ─────────────────────────────── DATE ──────────────────────────────────
+
+const now = new Date();
+$('dateStamp').textContent = now.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+
+// ─────────────────────────────── UNIT SYNC ─────────────────────────────
+
+$('unit').addEventListener('change', () => {
+  const u = $('unit').value;
+  $('unitW').textContent = u;
+  $('unitH').textContent = u;
+  // Sync room depth unit label
+  if (u === 'm' || u === 'cm' || u === 'ft' || u === 'in') {
+    $('roomUnit').textContent = u === 'cm' ? 'm' : u; // room always in meters or ft
+  }
+  calculate();
+});
+
+// ─────────────────────────────── LOCK PILLS ────────────────────────────
+
+document.querySelectorAll('.hdr-pill').forEach(p => {
+  p.addEventListener('click', () => {
+    document.querySelectorAll('.hdr-pill').forEach(x => x.classList.remove('active'));
+    p.classList.add('active');
+    lockMode = p.dataset.lock;
+    calculate();
+  });
+});
+
+// ─────────────────────────────── LENS MODE ─────────────────────────────
+
+document.querySelectorAll('.lens-mode-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.lens-mode-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    lensMode = btn.dataset.lmode;
+    $('lens-single').style.display = lensMode === 'single' ? '' : 'none';
+    $('lens-range').style.display  = lensMode === 'range'  ? '' : 'none';
+    $('lens-preset').style.display = lensMode === 'preset' ? '' : 'none';
+    calculate();
+  });
+});
+
+// ─────────────────────────────── CANVAS TABS ───────────────────────────
+
+document.querySelectorAll('.c-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.c-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    activeView = tab.dataset.view;
+    // Toggle lens shift panel
+    const lsPanel = $('lsPanel');
+    if (activeView === 'lensshift') {
+      lsPanel.classList.add('visible');
+    } else {
+      lsPanel.classList.remove('visible');
+    }
+    redrawCanvas();
+    if (activeView === 'lensshift') calculateLensShift();
+  });
+});
+
+// ─────────────────────────────── PROJECTOR PRESET ──────────────────────
+
+$('projPreset').addEventListener('change', () => {
+  const v = $('projPreset').value;
+  if (v) { const [w, h] = v.split(',').map(Number); $('projW').value = w; $('projH').value = h; calculate(); }
+});
+
+['projW', 'projH'].forEach(id => {
+  $(id).addEventListener('input', () => {
+    const w = +$('projW').value, h = +$('projH').value;
+    const match = [...$('projPreset').options].find(o => o.value === `${w},${h}`);
+    $('projPreset').value = match ? match.value : '';
+  });
+});
+
+// ─────────────────────────────── LENS VALUES ───────────────────────────
+
+function getLensRatios() {
+  if (lensMode === 'single') {
+    const tr = parseFloat($('trSingle').value) || 0;
+    return { trMin: tr, trMax: tr };
+  }
+  if (lensMode === 'range') {
+    const a = parseFloat($('trMin').value) || 0, b = parseFloat($('trMax').value) || 0;
+    return { trMin: Math.min(a, b), trMax: Math.max(a, b) };
+  }
+  const [a, b] = $('lensPresetSel').value.split(',');
+  const mn = parseFloat(a) || 0, mx = b ? (parseFloat(b) || mn) : mn;
+  return { trMin: mn, trMax: mx };
+}
+
+function getRoomDepth() {
+  const n = parseFloat($('roomDepth').value);
+  if (!n || n <= 0) return null;
+  const unit = $('unit').value;
+  return toMeters(n, unit === 'cm' ? 'm' : unit);
+}
+
+// ─────────────────────────────── SOLVER ────────────────────────────────
+
+function solve(wallWm, wallHm, projW, projH, trMin, trMax, lock) {
+  const projAR = projW / projH;
+  let imageWm, imageHm, constrainedBy;
+
+  if (lock === 'width') {
+    imageWm = wallWm; imageHm = wallWm / projAR; constrainedBy = 'width';
+  } else if (lock === 'height') {
+    imageHm = wallHm; imageWm = wallHm * projAR; constrainedBy = 'height';
+  } else {
+    if ((wallWm / wallHm) <= projAR) { imageWm = wallWm; imageHm = wallWm / projAR; constrainedBy = 'width'; }
+    else { imageHm = wallHm; imageWm = wallHm * projAR; constrainedBy = 'height'; }
+  }
+
+  const throwDistMin = imageWm * trMin, throwDistMax = imageWm * trMax;
+  const mpx = imageWm / projW;
+  const wallInPixW = wallWm / mpx, wallInPixH = wallHm / mpx;
+  const activePixW = clamp(wallInPixW, 0, projW), activePixH = clamp(wallInPixH, 0, projH);
+  const bleedPixW = Math.max(0, projW - wallInPixW), bleedPixH = Math.max(0, projH - wallInPixH);
+  const unusedWallWm = Math.max(0, wallWm - imageWm), unusedWallHm = Math.max(0, wallHm - imageHm);
+  const bleedWm = bleedPixW * mpx, bleedHm = bleedPixH * mpx;
+  const activePxArea = activePixW * activePixH, totalPxArea = projW * projH;
+  const pixelUtil = activePxArea / totalPxArea;
+  const wallCoverage = Math.min(1, (imageWm * imageHm) / (wallWm * wallHm));
+
+  return { imageWm, imageHm, throwDistMin, throwDistMax,
+    activePixW, activePixH, bleedPixW, bleedPixH, bleedWm, bleedHm,
+    unusedWallWm, unusedWallHm, mpx, constrainedBy,
+    wallInPixW, wallInPixH, activePxArea, totalPxArea, pixelUtil, wallCoverage,
+    projW, projH, wallWm, wallHm };
+}
+
+// ─────────────────────────────── PROJECTOR DB ──────────────────────────
+
+let projectorDB = null;
+let selectedLens = null;
+
+// Try to auto-load projectors.json from same directory
+fetch('./projectors.json')
+  .then(r => r.ok ? r.json() : Promise.reject())
+  .then(db => loadDB(db, 'projectors.json'))
+  .catch(() => {}); // silent fail — user can load manually
+
+$('loadDbBtn').addEventListener('click', () => $('dbFileInput').click());
+$('dbFileInput').addEventListener('change', e => {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const db = JSON.parse(ev.target.result);
+      loadDB(db, file.name);
+    } catch { setDbStatus('Invalid JSON file', true); }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+});
+
+function loadDB(db, filename) {
+  if (!db.projectors || !Array.isArray(db.projectors)) {
+    setDbStatus('Invalid DB structure', true); return;
+  }
+  // Filter out template entries
+  projectorDB = { ...db, projectors: db.projectors.filter(p => !p._template) };
+  setDbStatus(`✓ ${filename} — ${projectorDB.projectors.length} projectors`, false);
+  populateProjectorSel();
+}
+
+function setDbStatus(msg, isErr) {
+  const el = $('dbStatus');
+  el.textContent = msg;
+  el.className = `db-status ${isErr ? 'err' : 'ok'}`;
+}
+
+function populateProjectorSel() {
+  const sel = $('projectorSel');
+  sel.innerHTML = '<option value="">Select projector…</option>';
+  if (!projectorDB) return;
+  projectorDB.projectors.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p.id;
+    opt.textContent = `${p.brand} ${p.model}`;
+    sel.appendChild(opt);
+  });
+  sel.disabled = false;
+}
+
+$('projectorSel').addEventListener('change', () => {
+  const proj = projectorDB?.projectors.find(p => p.id === $('projectorSel').value);
+  const lensSel = $('lensDbSel');
+  lensSel.innerHTML = '<option value="">Select lens…</option>';
+  selectedLens = null;
+  $('lensSpecDisplay').style.display = 'none';
+  if (!proj) { lensSel.disabled = true; return; }
+  // Auto-fill projector resolution from DB
+  if (proj.native_resolution) {
+    $('projW').value = proj.native_resolution[0];
+    $('projH').value = proj.native_resolution[1];
+    const match = [...$('projPreset').options].find(o => o.value === `${proj.native_resolution[0]},${proj.native_resolution[1]}`);
+    $('projPreset').value = match ? match.value : '';
+    calculate();
+  }
+  proj.lenses.forEach(l => {
+    const opt = document.createElement('option');
+    opt.value = l.id;
+    opt.textContent = `${l.model} — ${l.name}`;
+    lensSel.appendChild(opt);
+  });
+  lensSel.disabled = false;
+});
+
+$('lensDbSel').addEventListener('change', () => {
+  const proj = projectorDB?.projectors.find(p => p.id === $('projectorSel').value);
+  selectedLens = proj?.lenses.find(l => l.id === $('lensDbSel').value) || null;
+  const disp = $('lensSpecDisplay');
+  if (selectedLens) {
+    disp.style.display = '';
+    const tr = selectedLens.throw_ratio;
+    $('lsThrowSpec').textContent = tr[0] === tr[1] ? `${tr[0]}:1 (fixed)` : `${tr[0]}–${tr[1]}:1`;
+    $('lsVUp').textContent   = `+${selectedLens.lens_shift_v_up_pct}%`;
+    $('lsVDown').textContent = `−${selectedLens.lens_shift_v_down_pct}%`;
+    $('lsH').textContent     = `±${selectedLens.lens_shift_h_pct}%`;
+    // Auto-fill throw ratio into the main lens input if single mode
+    if (lensMode === 'single') {
+      $('trSingle').value = ((tr[0] + tr[1]) / 2).toFixed(2);
+    } else if (lensMode === 'range') {
+      $('trMin').value = tr[0];
+      $('trMax').value = tr[1];
+    }
+    calculate();
+    calculateLensShift();
+  } else {
+    disp.style.display = 'none';
+  }
+});
+
+// ─────────────────────────────── LENS SHIFT CALC ───────────────────────
+
+function calculateLensShift() {
+  if (!lastResult) {
+    clearShiftResults(); return;
+  }
+
+  const projFloorH  = parseFloat($('projFloorH').value)  || 0;
+  const screenBot   = parseFloat($('screenBottom').value) || 0;
+  const screenTop   = parseFloat($('screenTop').value)    || 0;
+  const projHOff    = parseFloat($('projHOffset').value)  || 0;
+
+  const imageH = lastResult.imageHm;
+  const imageW = lastResult.imageWm;
+
+  if (imageH <= 0) { clearShiftResults(); return; }
+
+  // Vertical shift: positive = image must move up relative to optical axis
+  const screenCenterH = (screenBot + screenTop) / 2;
+  const vShiftM   = screenCenterH - projFloorH;
+  const vShiftPct = (vShiftM / imageH) * 100;
+
+  // Horizontal shift: positive = image moves right
+  const hShiftM   = projHOff;
+  const hShiftPct = (hShiftM / imageW) * 100;
+
+  // Display shift needed
+  $('lsVNeeded').textContent = `${vShiftM >= 0 ? '+' : ''}${vShiftM.toFixed(3)} m`;
+  $('lsVPct').textContent    = `${vShiftPct >= 0 ? '+' : ''}${vShiftPct.toFixed(1)}% of image H`;
+  $('lsHNeeded').textContent = `${hShiftM >= 0 ? '+' : ''}${hShiftM.toFixed(3)} m`;
+  $('lsHPct').textContent    = `${hShiftPct >= 0 ? '+' : ''}${hShiftPct.toFixed(1)}% of image W`;
+
+  // Check against lens spec
+  if (selectedLens) {
+    const maxUp   = selectedLens.lens_shift_v_up_pct;
+    const maxDown = selectedLens.lens_shift_v_down_pct;
+    const maxH    = selectedLens.lens_shift_h_pct;
+
+    let vOK, vClearPct;
+    if (vShiftPct >= 0) {
+      vOK = vShiftPct <= maxUp;
+      vClearPct = maxUp - vShiftPct;
+    } else {
+      vOK = Math.abs(vShiftPct) <= maxDown;
+      vClearPct = maxDown - Math.abs(vShiftPct);
+    }
+    const hOK = Math.abs(hShiftPct) <= maxH;
+
+    $('lsVClear').textContent = vOK
+      ? `+${vClearPct.toFixed(1)}% remaining`
+      : `${Math.abs(vClearPct).toFixed(1)}% over limit`;
+    $('lsVClear').className = `r-val ${vOK ? 'ok' : 'warn'}`;
+
+    const allOK = vOK && hOK;
+    $('lsStatus').textContent  = allOK ? '✓ Within range' : '✗ Out of range';
+    $('lsStatus').className    = `r-val ${allOK ? 'ok' : 'warn'}`;
+
+    // Visual shift bar
+    // Total range: from -maxDown% to +maxUp% — center = 0%
+    const totalRange = maxUp + maxDown;
+    const centerPx   = maxDown / totalRange; // where 0% sits (as fraction 0–1)
+
+    // Green range fill (full available range)
+    $('lsRangeBar').style.left  = '0%';
+    $('lsRangeBar').style.width = '100%';
+
+    // Needle position
+    const needle = $('lsNeedle');
+    needle.style.display = '';
+    const needleFrac = (vShiftPct + maxDown) / totalRange;
+    needle.style.left = `${clamp(needleFrac * 100, 0, 100)}%`;
+    needle.style.background = vOK ? '#fff' : '#cc6644';
+
+    $('lsBarDownLabel').textContent = `↓${maxDown}%`;
+    $('lsBarUpLabel').textContent   = `↑${maxUp}%`;
+
+  } else {
+    $('lsVClear').textContent = 'No lens selected';
+    $('lsVClear').className   = 'r-val';
+    $('lsStatus').textContent = 'Select a lens from DB';
+    $('lsStatus').className   = 'r-val';
+    $('lsNeedle').style.display = 'none';
+  }
+
+  if (activeView === 'lensshift') redrawCanvas();
+}
+
+function clearShiftResults() {
+  ['lsVNeeded','lsVPct','lsVClear','lsHNeeded','lsHPct','lsStatus'].forEach(id => {
+    const el = $(id); if (el) { el.textContent = '—'; el.className = 'r-val'; }
+  });
+  $('lsNeedle').style.display = 'none';
+}
+
+// ─────────────────────────────── LAST RESULT ───────────────────────────
+
+let lastResult = null;
+
+// ─────────────────────────────── CALCULATE ─────────────────────────────
+
+function calculate() {
+  const wallW = parseFloat($('wallW').value), wallH = parseFloat($('wallH').value), unit = $('unit').value;
+  const projW = parseInt($('projW').value) || 1920, projH = parseInt($('projH').value) || 1200;
+  if (!wallW || !wallH || wallW <= 0 || wallH <= 0) { clearResults(); return; }
+  const wallWm = toMeters(wallW, unit), wallHm = toMeters(wallH, unit);
+  const { trMin, trMax } = getLensRatios();
+  if (!trMin || trMin <= 0) { clearResults(); return; }
+  const roomDepthM = getRoomDepth();
+  const r = solve(wallWm, wallHm, projW, projH, trMin, trMax, lockMode);
+  lastResult = r;
+  const isRange = trMin !== trMax;
+
+  // Throw distance
+  if (isRange) {
+    $('throwVal').textContent = `${fmtDist(r.throwDistMin)}–${fmtDist(r.throwDistMax)}`;
+    $('throwSub').textContent = `${toImperial(r.throwDistMin)} – ${toImperial(r.throwDistMax)}`;
+  } else {
+    $('throwVal').textContent = fmtDist(r.throwDistMin);
+    $('throwSub').textContent = toImperial(r.throwDistMin);
+  }
+
+  // Key results
+  $('rImageSize').textContent = `${fmtDist(r.imageWm)} × ${fmtDist(r.imageHm)}`;
+  const ppm = projW / r.imageWm;
+  $('rPxDensity').textContent = `${Math.round(ppm)} px/m · ${(ppm / 39.3701).toFixed(1)} PPI`;
+  $('rMmPx').textContent = `${(r.imageWm * 1000 / projW).toFixed(2)} mm`;
+
+  const gW = gcd(Math.round(r.wallInPixW), Math.round(r.wallInPixH));
+  $('rWallAR').textContent = `${Math.round(r.wallInPixW / gW)}:${Math.round(r.wallInPixH / gW)}`;
+  const gP = gcd(projW, projH);
+  $('rProjAR').textContent = `${projW / gP}:${projH / gP}`;
+
+  const fullCover = r.wallCoverage >= 0.999;
+  $('rCoverage').textContent = fullCover ? 'Full' : `${(r.wallCoverage * 100).toFixed(1)}%`;
+  $('rCoverage').className = `r-val ${fullCover ? 'ok' : ''}`;
+
+  if (roomDepthM) {
+    $('rowRoom').style.display = '';
+    const fits = roomDepthM >= r.throwDistMin;
+    $('rRoom').textContent = fits ? `+${fmtDist(roomDepthM - r.throwDistMin)}` : `−${fmtDist(r.throwDistMin - roomDepthM)}`;
+    $('rRoom').className = `r-val ${fits ? 'ok' : 'warn'}`;
+  } else {
+    $('rowRoom').style.display = 'none';
+  }
+
+  // Pixel accounting
+  const util = r.pixelUtil * 100;
+  $('pxBarA').style.width = `${util}%`;
+  $('pxBarB').style.width = `${(1 - r.pixelUtil) * 100}%`;
+  $('pxActive').textContent = `${fmt(Math.round(r.activePixW))}×${fmt(Math.round(r.activePixH))} px`;
+  $('pxUtil').textContent = `${util.toFixed(1)}%`;
+
+  const hasBleed = r.bleedPixW > 0 || r.bleedPixH > 0;
+  $('rowBleed').style.display = hasBleed ? '' : 'none';
+  if (hasBleed) {
+    $('pxBleed').textContent = `${fmt(Math.round(r.totalPxArea - r.activePxArea))} px`;
+    $('rowBleedDetail').style.display = '';
+    let d = '';
+    if (r.bleedPixH > 0 && r.bleedPixW > 0) d = `${fmt(Math.round(r.bleedPixH/2))}px T/B · ${fmt(Math.round(r.bleedPixW/2))}px L/R`;
+    else if (r.bleedPixH > 0) d = `${fmt(Math.round(r.bleedPixH/2))} px top/bottom`;
+    else d = `${fmt(Math.round(r.bleedPixW/2))} px left/right`;
+    $('pxBleedDetail').textContent = d;
+  } else {
+    $('rowBleedDetail').style.display = 'none';
+  }
+
+  const hasMargin = r.unusedWallWm > 0.001 || r.unusedWallHm > 0.001;
+  $('rowMargin').style.display = hasMargin ? '' : 'none';
+  if (hasMargin) {
+    const parts = [];
+    if (r.unusedWallHm > 0.001) parts.push(`${fmtDist(r.unusedWallHm/2)} T/B`);
+    if (r.unusedWallWm > 0.001) parts.push(`${fmtDist(r.unusedWallWm/2)} L/R`);
+    $('pxMargin').textContent = parts.join(' · ');
+  }
+
+  // Info bar
+  $('ciThrow').textContent = isRange ? `${fmtDist(r.throwDistMin)}–${fmtDist(r.throwDistMax)}` : fmtDist(r.throwDistMin);
+  $('ciImage').textContent = `${fmtDist(r.imageWm)} × ${fmtDist(r.imageHm)}`;
+  $('ciDensity').textContent = `${Math.round(projW / r.imageWm)} px/m`;
+  $('ciUtil').textContent = `${util.toFixed(1)}%`;
+  $('ciFit').textContent = lockMode === 'width' ? 'Lock Width' : lockMode === 'height' ? 'Lock Height' : 'Fit Both';
+
+  redrawCanvas();
+  calculateLensShift();
+}
+
+// ─────────────────────────────── CLEAR ─────────────────────────────────
+
+function clearResults() {
+  lastResult = null;
+  ['throwVal','rImageSize','rPxDensity','rMmPx','rWallAR','rProjAR','rCoverage','pxActive','pxUtil'].forEach(id => { const el=$(id); if(el) el.textContent='—'; });
+  ['throwSub'].forEach(id => { const el=$(id); if(el) el.textContent=''; });
+  ['rowBleed','rowMargin','rowBleedDetail','rowRoom'].forEach(id => { const el=$(id); if(el) el.style.display='none'; });
+  $('pxBarA').style.width = '0%'; $('pxBarB').style.width = '0%';
+  ['ciThrow','ciImage','ciDensity','ciUtil','ciFit'].forEach(id => { const el=$(id); if(el) el.textContent='—'; });
+  const c = $('mainCanvas');
+  if (c) { const ctx = c.getContext('2d'); ctx.clearRect(0,0,c.width,c.height); }
+}
+
+// ─────────────────────────────── CANVAS RESIZE ─────────────────────────
+
+const mainCanvas = $('mainCanvas');
+const resizeObserver = new ResizeObserver(entries => {
+  const { width, height } = entries[0].contentRect;
+  mainCanvas.width  = Math.round(width  * devicePixelRatio);
+  mainCanvas.height = Math.round(height * devicePixelRatio);
+  redrawCanvas();
+});
+resizeObserver.observe($('canvasWrapper'));
+
+// ─────────────────────────────── REDRAW ────────────────────────────────
+
+function redrawCanvas() {
+  const ctx = mainCanvas.getContext('2d');
+  ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+  const W = mainCanvas.width / devicePixelRatio;
+  const H = mainCanvas.height / devicePixelRatio;
+  ctx.clearRect(0, 0, W, H);
+
+  if (!lastResult) {
+    const tc = getThemeColors();
+    ctx.fillStyle = tc.bg; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = tc.dim;
+    ctx.font = '12px -apple-system, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Enter wall dimensions and lens to calculate', W/2, H/2);
+    return;
+  }
+
+  if (activeView === 'pixmap')    drawPixelMap(ctx, W, H, lastResult);
+  else if (activeView === 'front') drawFront(ctx, W, H, lastResult);
+  else if (activeView === 'top')   drawTop(ctx, W, H, lastResult, getRoomDepth());
+  else if (activeView === 'lensshift') drawLensShift(ctx, W, H);
+}
+
+// ─────────────────────────────── DRAW: PIXEL MAP ───────────────────────
+
+function drawPixelMap(ctx, W, H, r) {
+  const tc = getThemeColors();
+  ctx.fillStyle = tc.bg; ctx.fillRect(0, 0, W, H);
+
+  const pad = 54;
+  const totalW = Math.max(r.wallWm, r.imageWm);
+  const totalH = Math.max(r.wallHm, r.imageHm);
+  const sc = Math.min((W - pad*2) / totalW, (H - pad*2) / totalH);
+
+  const ox = (W - totalW * sc) / 2, oy = (H - totalH * sc) / 2;
+  const wallX = ox + (totalW*sc - r.wallWm*sc) / 2;
+  const wallY = oy + (totalH*sc - r.wallHm*sc) / 2;
+  const imgX  = ox + (totalW*sc - r.imageWm*sc) / 2;
+  const imgY  = oy + (totalH*sc - r.imageHm*sc) / 2;
+  const wW = r.wallWm*sc, wH = r.wallHm*sc;
+  const iW = r.imageWm*sc, iH = r.imageHm*sc;
+
+  // Wall background fill
+  ctx.fillStyle = tc.wallFill;
+  ctx.fillRect(wallX, wallY, wW, wH);
+
+  // Bleed zone
+  if (r.bleedPixW > 0 || r.bleedPixH > 0) {
+    ctx.fillStyle = tc.bleedFill;
+    ctx.fillRect(imgX, imgY, iW, iH);
+    ctx.strokeStyle = tc.bleedStroke;
+    ctx.lineWidth = 1; ctx.setLineDash([4, 4]);
+    ctx.strokeRect(imgX + 0.5, imgY + 0.5, iW - 1, iH - 1);
+    ctx.setLineDash([]);
+  }
+
+  // Active intersection
+  const ax = Math.max(wallX, imgX), ay = Math.max(wallY, imgY);
+  const aw = Math.min(wallX+wW, imgX+iW) - ax;
+  const ah = Math.min(wallY+wH, imgY+iH) - ay;
+  if (aw > 0 && ah > 0) {
+    ctx.fillStyle = tc.active;
+    ctx.fillRect(ax, ay, aw, ah);
+    ctx.strokeStyle = tc.activeGrid; ctx.lineWidth = 0.5;
+    const step = Math.max(20, aw / 14);
+    for (let x = ax; x <= ax+aw; x += step) {
+      ctx.beginPath(); ctx.moveTo(x, ay); ctx.lineTo(x, ay+ah); ctx.stroke();
+    }
+    for (let y = ay; y <= ay+ah; y += step) {
+      ctx.beginPath(); ctx.moveTo(ax, y); ctx.lineTo(ax+aw, y); ctx.stroke();
+    }
+  }
+
+  // Wall border
+  ctx.strokeStyle = tc.wall; ctx.lineWidth = 1.5; ctx.setLineDash([]);
+  ctx.strokeRect(wallX + 0.5, wallY + 0.5, wW - 1, wH - 1);
+
+  const font = '-apple-system, BlinkMacSystemFont, sans-serif';
+  if (aw > 120 && ah > 60) {
+    ctx.fillStyle = tc.dim; ctx.font = `700 11px ${font}`; ctx.textAlign = 'center';
+    ctx.fillText('ACTIVE PROJECTION', ax+aw/2, ay+ah/2 - 8);
+    ctx.font = `10px ${font}`;
+    ctx.fillText(`${fmt(Math.round(r.activePixW))} × ${fmt(Math.round(r.activePixH))} px`, ax+aw/2, ay+ah/2 + 8);
+    ctx.fillText(`${(r.pixelUtil*100).toFixed(1)}% utilization`, ax+aw/2, ay+ah/2 + 22);
+  }
+
+  ctx.fillStyle = tc.dim; ctx.font = `10px ${font}`; ctx.textAlign = 'center';
+  ctx.fillText(`${fmtDist(r.wallWm)}  ·  ${fmt(Math.round(r.wallInPixW))} px`, wallX+wW/2, wallY - 10);
+  ctx.save(); ctx.translate(wallX - 12, wallY+wH/2); ctx.rotate(-Math.PI/2);
+  ctx.fillText(`${fmtDist(r.wallHm)}  ·  ${fmt(Math.round(r.wallInPixH))} px`, 0, 0); ctx.restore();
+
+  ctx.fillStyle = tc.dimmer; ctx.font = `9px ${font}`; ctx.textAlign = 'center';
+  ctx.fillText(`${toImperial(r.wallWm)}`, wallX+wW/2, wallY - 1);
+
+  ctx.fillStyle = tc.bleedText; ctx.font = `9px ${font}`;
+  if (r.bleedPixH > 0) {
+    const bh = r.bleedHm/2*sc;
+    if (bh > 12) {
+      ctx.textAlign = 'center';
+      ctx.fillText(`${fmt(Math.round(r.bleedPixH/2))}px bleed`, imgX+iW/2, imgY + bh/2 + 4);
+      ctx.fillText(`${fmt(Math.round(r.bleedPixH/2))}px bleed`, imgX+iW/2, imgY+iH - bh/2 + 4);
+    }
+  }
+  if (r.bleedPixW > 0) {
+    const bw = r.bleedWm/2*sc;
+    if (bw > 14) {
+      ctx.save(); ctx.translate(imgX+bw/2, imgY+iH/2); ctx.rotate(-Math.PI/2); ctx.textAlign='center';
+      ctx.fillText(`${fmt(Math.round(r.bleedPixW/2))}px`, 0, 0); ctx.restore();
+      ctx.save(); ctx.translate(imgX+iW-bw/2, imgY+iH/2); ctx.rotate(-Math.PI/2); ctx.textAlign='center';
+      ctx.fillText(`${fmt(Math.round(r.bleedPixW/2))}px`, 0, 0); ctx.restore();
+    }
+  }
+
+  if (r.unusedWallHm > 0.002) {
+    const mh = r.unusedWallHm/2*sc;
+    ctx.fillStyle = tc.dimmer; ctx.font = `9px ${font}`; ctx.textAlign = 'center';
+    if (mh > 8) {
+      ctx.fillText(`${fmtDist(r.unusedWallHm/2)} margin`, wallX+wW/2, wallY + mh/2 + 4);
+      ctx.fillText(`${fmtDist(r.unusedWallHm/2)} margin`, wallX+wW/2, wallY+wH - mh/2 + 4);
+    }
+  }
+
+  ctx.fillStyle = tc.dimmer; ctx.font = `700 9px ${font}`; ctx.textAlign = 'left';
+  ctx.fillText('PIXEL MAP', 10, 16);
+}
+
+// ─────────────────────────────── DRAW: FRONT VIEW ──────────────────────
+
+function drawFront(ctx, W, H, r) {
+  const tc = getThemeColors();
+  ctx.fillStyle = tc.bg; ctx.fillRect(0, 0, W, H);
+
+  const pad = 52;
+  const totalW = Math.max(r.wallWm, r.imageWm), totalH = Math.max(r.wallHm, r.imageHm);
+  const sc = Math.min((W - pad*2) / totalW, (H - pad*2) / totalH);
+  const ox = (W - totalW*sc)/2, oy = (H - totalH*sc)/2;
+  const wallX = ox + (totalW*sc - r.wallWm*sc)/2, wallY = oy + (totalH*sc - r.wallHm*sc)/2;
+  const imgX  = ox + (totalW*sc - r.imageWm*sc)/2, imgY  = oy + (totalH*sc - r.imageHm*sc)/2;
+  const wW = r.wallWm*sc, wH = r.wallHm*sc, iW = r.imageWm*sc, iH = r.imageHm*sc;
+
+  const font = '-apple-system, sans-serif';
+
+  ctx.fillStyle = tc.wallFill; ctx.fillRect(wallX, wallY, wW, wH);
+
+  if (r.bleedPixW > 0 || r.bleedPixH > 0) {
+    ctx.fillStyle = tc.bleedFill; ctx.fillRect(imgX, imgY, iW, iH);
+    ctx.strokeStyle = tc.bleedStroke; ctx.lineWidth = 1; ctx.setLineDash([5, 5]);
+    ctx.strokeRect(imgX+0.5, imgY+0.5, iW-1, iH-1); ctx.setLineDash([]);
+  }
+
+  const ax = Math.max(wallX, imgX), ay = Math.max(wallY, imgY);
+  const aw = Math.min(wallX+wW, imgX+iW) - ax, ah = Math.min(wallY+wH, imgY+iH) - ay;
+  if (aw > 0 && ah > 0) {
+    ctx.fillStyle = tc.active; ctx.fillRect(ax, ay, aw, ah);
+  }
+
+  ctx.strokeStyle = tc.wall; ctx.lineWidth = 1.5; ctx.setLineDash([]);
+  ctx.strokeRect(wallX+0.5, wallY+0.5, wW-1, wH-1);
+
+  ctx.fillStyle = tc.dim; ctx.font = `10px ${font}`; ctx.textAlign = 'center';
+  ctx.fillText(`${fmtDist(r.wallWm)}`, wallX+wW/2, wallY - 8);
+  ctx.save(); ctx.translate(wallX-12, wallY+wH/2); ctx.rotate(-Math.PI/2);
+  ctx.fillText(`${fmtDist(r.wallHm)}`, 0, 0); ctx.restore();
+  if (aw > 60 && ah > 30) {
+    ctx.fillStyle = tc.dim; ctx.font = `700 11px ${font}`; ctx.textAlign = 'center';
+    ctx.fillText('WALL', ax+aw/2, ay+ah/2+4);
+  }
+  if (r.bleedPixH > 0 || r.bleedPixW > 0) {
+    ctx.fillStyle = tc.bleedText; ctx.font = `9px ${font}`; ctx.textAlign='center';
+    ctx.fillText(`proj: ${fmtDist(r.imageWm)} × ${fmtDist(r.imageHm)}`, imgX+iW/2, imgY+iH+12);
+  }
+  ctx.fillStyle = tc.dimmer; ctx.font = `700 9px ${font}`; ctx.textAlign = 'left';
+  ctx.fillText('FRONT VIEW', 10, 16);
+}
+
+// ─────────────────────────────── DRAW: TOP VIEW ────────────────────────
+
+function drawTop(ctx, W, H, r, roomDepthM) {
+  const tc = getThemeColors();
+  ctx.fillStyle = tc.bg; ctx.fillRect(0, 0, W, H);
+
+  const font = '-apple-system, sans-serif';
+  const pad = 44;
+  const throwDist = r.throwDistMin;
+  const totalDepth = roomDepthM ? Math.max(throwDist * 1.2, roomDepthM * 1.05) : throwDist * 1.3;
+  const totalSpan  = Math.max(r.wallWm, r.imageWm) * 1.5;
+  const sc = Math.min((W - pad*2) / totalDepth, (H - pad*2) / totalSpan);
+
+  const wallX = pad + 20, cy = H / 2;
+  const projX = wallX + throwDist * sc;
+
+  if (roomDepthM) {
+    const rW = roomDepthM * sc;
+    ctx.fillStyle = tc.roomFill; ctx.fillRect(wallX, pad, rW, H - pad*2);
+    ctx.strokeStyle = tc.roomStroke; ctx.lineWidth = 1;
+    ctx.strokeRect(wallX+0.5, pad+0.5, rW-1, H-pad*2-1);
+  }
+
+  const halfBeam = r.imageWm * sc / 2;
+  const grad = ctx.createLinearGradient(projX, cy, wallX, cy);
+  grad.addColorStop(0, tc.beamFill);
+  grad.addColorStop(1, tc.beamFillEnd);
+  ctx.fillStyle = grad;
+  ctx.beginPath(); ctx.moveTo(projX, cy); ctx.lineTo(wallX, cy-halfBeam); ctx.lineTo(wallX, cy+halfBeam); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = tc.beamEdge; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(projX, cy); ctx.lineTo(wallX, cy-halfBeam); ctx.moveTo(projX, cy); ctx.lineTo(wallX, cy+halfBeam); ctx.stroke();
+
+  const wallSpan = r.wallWm * sc;
+  ctx.strokeStyle = tc.wall; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(wallX, cy-wallSpan/2); ctx.lineTo(wallX, cy+wallSpan/2); ctx.stroke();
+
+  ctx.fillStyle = tc.projDot;
+  ctx.beginPath(); ctx.arc(projX, cy, 6, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = tc.projInner;
+  ctx.beginPath(); ctx.arc(projX, cy, 3, 0, Math.PI*2); ctx.fill();
+
+  const lineY = H - pad + 4;
+  ctx.strokeStyle = tc.dimLine; ctx.lineWidth = 1; ctx.setLineDash([2, 5]);
+  ctx.beginPath(); ctx.moveTo(wallX, lineY); ctx.lineTo(projX, lineY); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.strokeStyle = tc.dimTick;
+  [[wallX, lineY-4, wallX, lineY+4], [projX, lineY-4, projX, lineY+4]].forEach(([x1,y1,x2,y2]) => {
+    ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+  });
+  ctx.fillStyle = tc.dim; ctx.font = `10px ${font}`; ctx.textAlign = 'center';
+  ctx.fillText(fmtDist(throwDist), (wallX+projX)/2, lineY+14);
+  ctx.fillStyle = tc.dimmer; ctx.font = `9px ${font}`;
+  ctx.fillText(toImperial(throwDist), (wallX+projX)/2, lineY+24);
+
+  ctx.fillStyle = tc.dim; ctx.font = `9px ${font}`; ctx.textAlign = 'center';
+  ctx.fillText('WALL', wallX, cy - wallSpan/2 - 6);
+  ctx.fillText(`${fmtDist(r.wallWm)}`, wallX, cy + wallSpan/2 + 14);
+  ctx.fillText('PROJ', projX, cy - 14);
+
+  if (roomDepthM) {
+    ctx.fillStyle = tc.dimmer; ctx.font = `9px ${font}`; ctx.textAlign = 'center';
+    ctx.fillText(`room: ${fmtDist(roomDepthM)}`, wallX + roomDepthM*sc/2, pad - 4);
+  }
+
+  ctx.fillStyle = tc.beamEdge; ctx.font = `9px ${font}`; ctx.textAlign = 'left';
+  ctx.fillText(`image: ${fmtDist(r.imageWm)}`, wallX + 6, cy - halfBeam - 6);
+
+  ctx.fillStyle = tc.dimmer; ctx.font = `700 9px ${font}`; ctx.textAlign = 'left';
+  ctx.fillText('TOP VIEW', 10, 16);
+}
+
+// ─────────────────────────────── DRAW: LENS SHIFT ──────────────────────
+
+function drawLensShift(ctx, W, H) {
+  const tc = getThemeColors();
+  ctx.fillStyle = tc.bg; ctx.fillRect(0, 0, W, H);
+
+  const font = '-apple-system, BlinkMacSystemFont, sans-serif';
+
+  const projFloorH = parseFloat($('projFloorH').value) || 0;
+  const screenBot  = parseFloat($('screenBottom').value) || 0;
+  const screenTop  = parseFloat($('screenTop').value)    || 0;
+  const projHOff   = parseFloat($('projHOffset').value)  || 0;
+  const r = lastResult;
+
+  if (!r) {
+    ctx.fillStyle = tc.dim; ctx.font = `12px ${font}`; ctx.textAlign = 'center';
+    ctx.fillText('Enter wall dimensions and lens values to calculate', W/2, H/2);
+    return;
+  }
+
+  const throwDist = r.throwDistMin;
+  const imageH    = r.imageHm;
+  const imageW    = r.imageWm;
+  const screenCenterH = (screenBot + screenTop) / 2;
+  const vShiftM   = screenCenterH - projFloorH;
+  const vShiftPct = (vShiftM / imageH) * 100;
+
+  // ── Layout: wall on left, projector on right ──────────────────────
+  const padL = 80, padR = 60, padT = 40, padB = 50;
+  const drawW = W - padL - padR;
+  const drawH = H - padT - padB;
+
+  // Floor Y coordinate
+  const floorY = H - padB;
+
+  // Figure out the max height to fit in view (ceiling = max height we need to show)
+  const maxHeightNeeded = Math.max(projFloorH, screenTop, imageH) * 1.15;
+  const scY = drawH / maxHeightNeeded; // pixels per meter (vertical)
+
+  // Horizontal scale: throw distance plus some margin
+  const scX = drawW / (throwDist * 1.25);
+
+  // Wall X position
+  const wallX = padL;
+  // Projector X position
+  const projX = wallX + throwDist * scX;
+
+  // Y positions (from floor up)
+  const yFromFloor = h => floorY - h * scY;
+
+  const projY     = yFromFloor(projFloorH);
+  const screenBotY = yFromFloor(screenBot);
+  const screenTopY = yFromFloor(screenTop);
+  const screenCtrY = yFromFloor(screenCenterH);
+
+  // Image extents if projected at 0 shift (centered on optical axis = proj height)
+  const imgDefaultTop    = yFromFloor(projFloorH + imageH / 2);
+  const imgDefaultBottom = yFromFloor(projFloorH - imageH / 2);
+
+  // Image extents with shift applied (image center at screenCenterH)
+  const imgShiftedTop    = yFromFloor(screenCenterH + imageH / 2);
+  const imgShiftedBottom = yFromFloor(screenCenterH - imageH / 2);
+
+  // ── Floor line ─────────────────────────────────────────────────────
+  ctx.strokeStyle = tc.floor; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(padL - 20, floorY); ctx.lineTo(W - padR + 20, floorY); ctx.stroke();
+  ctx.fillStyle = tc.dim; ctx.font = `9px ${font}`; ctx.textAlign = 'right';
+  ctx.fillText('floor 0 m', padL - 4, floorY + 3);
+
+  // ── Wall (vertical line) ───────────────────────────────────────────
+  ctx.strokeStyle = tc.wall; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(wallX, floorY); ctx.lineTo(wallX, padT); ctx.stroke();
+
+  // ── Screen area on wall ────────────────────────────────────────────
+  const screenOK = selectedLens
+    ? (Math.abs(vShiftPct) <= (vShiftPct >= 0 ? selectedLens.lens_shift_v_up_pct : selectedLens.lens_shift_v_down_pct))
+    : true;
+  const sOkA = screenOK ? tc.ok : tc.warn;
+  ctx.fillStyle = screenOK ? 'rgba(109,187,109,0.18)' : 'rgba(204,102,68,0.18)';
+  ctx.fillRect(wallX - 8, screenTopY, 8, screenBotY - screenTopY);
+  ctx.strokeStyle = screenOK ? 'rgba(109,187,109,0.6)' : 'rgba(204,102,68,0.6)';
+  ctx.lineWidth = 2; ctx.setLineDash([]);
+  ctx.beginPath();
+  ctx.moveTo(wallX - 1, screenBotY); ctx.lineTo(wallX - 1, screenTopY);
+  ctx.stroke();
+
+  ctx.fillStyle = tc.dim; ctx.font = `9px ${font}`; ctx.textAlign = 'right';
+  ctx.fillText(`${screenTop.toFixed(2)} m`, wallX - 11, screenTopY + 4);
+  ctx.fillText(`${screenBot.toFixed(2)} m`, wallX - 11, screenBotY + 4);
+
+  // ── Beam cone (ghost — no shift) ───────────────────────────────────
+  ctx.fillStyle = tc.beamFill;
+  ctx.beginPath();
+  ctx.moveTo(projX, projY);
+  ctx.lineTo(wallX, imgDefaultTop);
+  ctx.lineTo(wallX, imgDefaultBottom);
+  ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = tc.axis; ctx.lineWidth = 1; ctx.setLineDash([3, 4]);
+  ctx.beginPath();
+  ctx.moveTo(projX, projY); ctx.lineTo(wallX, imgDefaultTop);
+  ctx.moveTo(projX, projY); ctx.lineTo(wallX, imgDefaultBottom);
+  ctx.stroke(); ctx.setLineDash([]);
+
+  // ── Optical axis ───────────────────────────────────────────────────
+  ctx.strokeStyle = tc.axis; ctx.lineWidth = 1; ctx.setLineDash([4, 6]);
+  ctx.beginPath(); ctx.moveTo(wallX, projY); ctx.lineTo(projX + 20, projY); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = tc.dim; ctx.font = `8px ${font}`; ctx.textAlign = 'left';
+  ctx.fillText('optical axis', projX + 24, projY + 3);
+
+  // ── Shifted beam cone ──────────────────────────────────────────────
+  const beamColor  = screenOK ? 'rgba(109,187,109,0.1)'  : 'rgba(204,102,68,0.1)';
+  const beamStroke = screenOK ? 'rgba(109,187,109,0.45)' : 'rgba(204,102,68,0.45)';
+  ctx.fillStyle = beamColor;
+  ctx.beginPath();
+  ctx.moveTo(projX, projY);
+  ctx.lineTo(wallX, imgShiftedTop);
+  ctx.lineTo(wallX, imgShiftedBottom);
+  ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = beamStroke; ctx.lineWidth = 1.5; ctx.setLineDash([]);
+  ctx.beginPath();
+  ctx.moveTo(projX, projY); ctx.lineTo(wallX, imgShiftedTop);
+  ctx.moveTo(projX, projY); ctx.lineTo(wallX, imgShiftedBottom);
+  ctx.stroke();
+
+  // ── Shift arrow ────────────────────────────────────────────────────
+  if (Math.abs(vShiftM) > 0.01) {
+    const arrowX = wallX + 14;
+    const arrowCol = sOkA;
+    ctx.strokeStyle = arrowCol; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(arrowX, projY); ctx.lineTo(arrowX, screenCtrY); ctx.stroke();
+    const dir = screenCtrY < projY ? -1 : 1;
+    ctx.beginPath();
+    ctx.moveTo(arrowX, screenCtrY);
+    ctx.lineTo(arrowX - 4, screenCtrY - dir * 7);
+    ctx.lineTo(arrowX + 4, screenCtrY - dir * 7);
+    ctx.closePath();
+    ctx.fillStyle = arrowCol; ctx.fill();
+    const midY = (projY + screenCtrY) / 2;
+    ctx.fillStyle = arrowCol; ctx.font = `700 9px ${font}`; ctx.textAlign = 'left';
+    ctx.fillText(`${vShiftM >= 0 ? '+' : ''}${vShiftPct.toFixed(1)}%`, arrowX + 7, midY + 3);
+    ctx.font = `9px ${font}`; ctx.fillStyle = tc.dim;
+    ctx.fillText(`(${vShiftM >= 0 ? '+' : ''}${vShiftM.toFixed(2)} m)`, arrowX + 7, midY + 13);
+  }
+
+  // ── Projector dot ──────────────────────────────────────────────────
+  ctx.fillStyle = tc.projDot;
+  ctx.beginPath(); ctx.arc(projX, projY, 7, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = tc.projInner;
+  ctx.beginPath(); ctx.arc(projX, projY, 3, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = tc.dim; ctx.font = `9px ${font}`; ctx.textAlign = 'center';
+  ctx.fillText('PROJ', projX, projY - 12);
+  ctx.fillStyle = tc.dim;
+  ctx.fillText(`${projFloorH.toFixed(2)} m`, projX, projY + 18);
+
+  // ── Throw distance dimension ───────────────────────────────────────
+  const dimY = floorY + 20;
+  ctx.strokeStyle = tc.dimLine; ctx.lineWidth = 1; ctx.setLineDash([2, 4]);
+  ctx.beginPath(); ctx.moveTo(wallX, dimY); ctx.lineTo(projX, dimY); ctx.stroke(); ctx.setLineDash([]);
+  ctx.strokeStyle = tc.dimTick; ctx.lineWidth = 1;
+  [[wallX, dimY-3, wallX, dimY+3],[projX, dimY-3, projX, dimY+3]].forEach(([x1,y1,x2,y2]) => {
+    ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+  });
+  ctx.fillStyle = tc.dim; ctx.font = `9px ${font}`; ctx.textAlign = 'center';
+  ctx.fillText(`throw: ${fmtDist(throwDist)} / ${toImperial(throwDist)}`, (wallX+projX)/2, dimY+12);
+
+  // ── Proj height dimension ──────────────────────────────────────────
+  ctx.strokeStyle = tc.dimLine; ctx.lineWidth = 1; ctx.setLineDash([2, 4]);
+  ctx.beginPath(); ctx.moveTo(padL - 35, floorY); ctx.lineTo(padL - 35, projY); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = tc.dim; ctx.font = `9px ${font}`; ctx.textAlign = 'right';
+  ctx.fillText(`${projFloorH.toFixed(2)} m`, padL - 40, (floorY + projY) / 2 + 3);
+
+  // ── Height ruler ticks ─────────────────────────────────────────────
+  ctx.strokeStyle = tc.floorTick; ctx.lineWidth = 1;
+  const tickStep = maxHeightNeeded > 8 ? 2 : 1;
+  for (let h = 0; h <= maxHeightNeeded; h += tickStep) {
+    const ty = yFromFloor(h);
+    ctx.beginPath(); ctx.moveTo(wallX - 4, ty); ctx.lineTo(wallX, ty); ctx.stroke();
+    ctx.fillStyle = tc.dim; ctx.font = `8px ${font}`; ctx.textAlign = 'right';
+    ctx.fillText(`${h}m`, wallX - 6, ty + 3);
+  }
+
+  // ── Lens spec overlay ──────────────────────────────────────────────
+  if (selectedLens) {
+    const maxUp = selectedLens.lens_shift_v_up_pct;
+    const maxDown = selectedLens.lens_shift_v_down_pct;
+    ctx.fillStyle = tc.dim; ctx.font = `700 8px ${font}`; ctx.textAlign = 'left';
+    ctx.fillText(`${selectedLens.model}  |  V: +${maxUp}% / −${maxDown}%  |  H: ±${selectedLens.lens_shift_h_pct}%`, 10, H - 10);
+  }
+
+  ctx.fillStyle = tc.dimmer; ctx.font = `700 9px ${font}`; ctx.textAlign = 'left';
+  ctx.fillText('LENS SHIFT — SIDE VIEW', 10, 16);
+}
+
+// ─────────────────────────────── THEME ─────────────────────────────────
+
+function isLight() { return document.documentElement.dataset.theme === 'light'; }
+
+function getThemeColors() {
+  const light = isLight();
+  return {
+    bg:           light ? '#fafaf8' : '#050505',
+    wall:         light ? '#888'    : '#555',
+    wallFill:     light ? 'rgba(0,0,0,0.04)'         : 'rgba(255,255,255,0.02)',
+    active:       light ? 'rgba(0,0,0,0.06)'          : 'rgba(255,255,255,0.07)',
+    activeGrid:   light ? 'rgba(0,0,0,0.07)'          : 'rgba(255,255,255,0.025)',
+    bleedFill:    light ? 'rgba(180,70,30,0.1)'       : 'rgba(160,60,20,0.12)',
+    bleedStroke:  light ? 'rgba(180,70,30,0.45)'      : 'rgba(160,60,20,0.3)',
+    bleedText:    light ? 'rgba(160,50,20,0.8)'       : 'rgba(180,80,40,0.6)',
+    beamFill:     light ? 'rgba(40,80,160,0.05)'      : 'rgba(255,255,255,0.0)',
+    beamFillEnd:  light ? 'rgba(40,80,160,0.1)'       : 'rgba(255,255,255,0.05)',
+    beamEdge:     light ? 'rgba(40,80,160,0.2)'       : 'rgba(255,255,255,0.15)',
+    roomFill:     light ? 'rgba(0,0,0,0.02)'          : 'rgba(255,255,255,0.01)',
+    roomStroke:   light ? '#ddd'    : '#1a1a1a',
+    dim:          light ? '#888'    : '#555',
+    dimmer:       light ? '#aaa'    : '#444',
+    text:         light ? '#333'    : '#ccc',
+    textHi:       light ? '#111'    : '#fff',
+    ok:           light ? '#2a8c2a' : '#6dbb6d',
+    warn:         light ? '#c04020' : '#cc6644',
+    projDot:      light ? '#555'    : '#aaa',
+    projInner:    light ? '#fff'    : '#000',
+    floor:        light ? '#ccc'    : '#2a2a2a',
+    floorTick:    light ? '#ddd'    : '#1a1a1a',
+    axis:         light ? '#bbb'    : '#333',
+    dimLine:      light ? '#ccc'    : '#2a2a2a',
+    dimTick:      light ? '#bbb'    : '#3a3a3a',
+  };
+}
+
+$('themeToggle').addEventListener('click', () => {
+  const light = isLight();
+  document.documentElement.dataset.theme = light ? '' : 'light';
+  $('themeToggle').textContent = light ? '☀︎' : '☾';
+  redrawCanvas();
+});
+
+// ─────────────────────────────── WIRE INPUTS ───────────────────────────
+
+['wallW','wallH','unit','projW','projH','trSingle','trMin','trMax',
+ 'roomDepth','lensPresetSel'].forEach(id => {
+  const el = $(id); if (el) el.addEventListener('input', calculate);
+});
+
+['projFloorH','screenBottom','screenTop','projHOffset'].forEach(id => {
+  const el = $(id);
+  if (el) el.addEventListener('input', calculateLensShift);
+});
+
+// ─────────────────────────────── COPY SPEC ─────────────────────────────
+
+$('copySpecBtn').addEventListener('click', () => {
+  const btn = $('copySpecBtn');
+  if (!lastResult) { btn.textContent = 'Nothing'; setTimeout(() => btn.textContent = 'Copy Spec', 1500); return; }
+  const r = lastResult, { trMin, trMax } = getLensRatios(), isRange = trMin !== trMax;
+  const projW = parseInt($('projW').value), projH = parseInt($('projH').value);
+  const project = $('projectName').value || 'Untitled';
+  const roomDepthM = getRoomDepth();
+
+  const lines = [
+    `LENS & THROW SPEC — ${project}`,
+    `Date: ${now.toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' })}`,
+    '',
+    `Wall:      ${fmtDist(r.wallWm)} × ${fmtDist(r.wallHm)}  (${toImperial(r.wallWm)} × ${toImperial(r.wallHm)})`,
+    `Projector: ${projW} × ${projH} px`,
+    `Fit mode:  ${lockMode === 'width' ? 'Lock Width' : lockMode === 'height' ? 'Lock Height' : 'Fit Both'}`,
+    '',
+    `Image:     ${fmtDist(r.imageWm)} × ${fmtDist(r.imageHm)}`,
+    isRange
+      ? `Throw:     ${fmtDist(r.throwDistMin)} – ${fmtDist(r.throwDistMax)}  (ratio ${trMin}–${trMax}:1)`
+      : `Throw:     ${fmtDist(r.throwDistMin)} / ${toImperial(r.throwDistMin)}  (ratio ${trMin}:1)`,
+    `Density:   ${Math.round(projW / r.imageWm)} px/m  ·  ${(projW / r.imageWm / 39.3701).toFixed(1)} PPI  ·  ${(r.imageWm * 1000 / projW).toFixed(2)} mm/px`,
+    '',
+    `Active px: ${fmt(Math.round(r.activePxArea))} px  (${(r.pixelUtil*100).toFixed(1)}% utilization)`,
+    `Bleed px:  ${fmt(Math.round(r.totalPxArea - r.activePxArea))} px`,
+    roomDepthM ? `Room:      ${fmtDist(roomDepthM)}  ${roomDepthM >= r.throwDistMin ? '(OK)' : '(TOO SHORT)'}` : null,
+    '',
+    '— Lens & Throw Calculator',
+  ].filter(l => l !== null).join('\n');
+
+  navigator.clipboard.writeText(lines).then(() => {
+    btn.textContent = 'Copied!'; btn.classList.add('done');
+    setTimeout(() => { btn.textContent = 'Copy Spec'; btn.classList.remove('done'); }, 2000);
+  });
+});
+
+// ─────────────────────────────── SCREENSHOT ────────────────────────────
+
+$('screenshotBtn').addEventListener('click', () => {
+  const btn = $('screenshotBtn'), row = btn.parentElement;
+  row.style.visibility = 'hidden';
+  html2canvas(document.body, { backgroundColor: '#000', scale: 1.5, useCORS: true }).then(c => {
+    row.style.visibility = '';
+    const p = ($('projectName').value || 'lens-calc').replace(/\s+/g, '-').toLowerCase();
+    const link = document.createElement('a');
+    link.download = `${p}-throw.png`;
+    link.href = c.toDataURL('image/png'); link.click();
+    btn.textContent = 'Saved!'; btn.classList.add('done');
+    setTimeout(() => { btn.textContent = 'Save PNG'; btn.classList.remove('done'); }, 2000);
+  }).catch(() => {
+    row.style.visibility = '';
+    btn.textContent = 'Error'; setTimeout(() => { btn.textContent = 'Save PNG'; }, 2000);
+  });
+});
+
+// ─────────────────────────────── INIT ──────────────────────────────────
+
+calculate();
+</script>
+</body>
+</html>

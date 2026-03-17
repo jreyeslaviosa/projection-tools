@@ -1,0 +1,341 @@
+{
+  "_schema": "projection-db",
+  "_version": "1.0",
+  "_updated": "2026-03",
+  "_units": {
+    "throw_ratio": "[min, max] — use same value twice for fixed lenses",
+    "lens_shift_v_up_pct":   "Max upward image shift as % of image HEIGHT from optical center",
+    "lens_shift_v_down_pct": "Max downward image shift as % of image HEIGHT from optical center",
+    "lens_shift_h_pct":      "Max horizontal shift EACH direction as % of image WIDTH from optical center"
+  },
+  "_note": "⚠ Approximate values — ALWAYS verify against official manufacturer datasheets before on-site use. Shift specs vary by projector orientation (floor/ceiling) and may be further limited by zoom position.",
+
+  "projectors": [
+
+    {
+      "id": "panasonic-pt-rz990",
+      "brand": "Panasonic",
+      "model": "PT-RZ990",
+      "native_resolution": [1920, 1200],
+      "brightness_lm": 10000,
+      "lens_mount": "ET-D75LE",
+      "notes": "WUXGA 1920×1200 laser, 3-chip DLP. Compatible with ET-D75LE lens series.",
+      "lenses": [
+        {
+          "id": "et-d75le6",
+          "model": "ET-D75LE6",
+          "name": "Short Fixed 0.60:1",
+          "category": "short",
+          "throw_ratio": [0.60, 0.60],
+          "zoom": false,
+          "lens_shift_v_up_pct": 67,
+          "lens_shift_v_down_pct": 17,
+          "lens_shift_h_pct": 6,
+          "notes": "Fixed lens, no zoom. Limited H shift."
+        },
+        {
+          "id": "et-d75le10",
+          "model": "ET-D75LE10",
+          "name": "Short Zoom 0.78–1.0:1",
+          "category": "short",
+          "throw_ratio": [0.78, 1.00],
+          "zoom": true,
+          "lens_shift_v_up_pct": 55,
+          "lens_shift_v_down_pct": 15,
+          "lens_shift_h_pct": 22,
+          "notes": ""
+        },
+        {
+          "id": "et-d75le20",
+          "model": "ET-D75LE20",
+          "name": "Standard Zoom 1.0–1.36:1",
+          "category": "standard",
+          "throw_ratio": [1.00, 1.36],
+          "zoom": true,
+          "lens_shift_v_up_pct": 60,
+          "lens_shift_v_down_pct": 20,
+          "lens_shift_h_pct": 22,
+          "notes": "Most common general-purpose lens"
+        },
+        {
+          "id": "et-d75le30",
+          "model": "ET-D75LE30",
+          "name": "Standard Zoom 1.36–1.72:1",
+          "category": "standard",
+          "throw_ratio": [1.36, 1.72],
+          "zoom": true,
+          "lens_shift_v_up_pct": 60,
+          "lens_shift_v_down_pct": 20,
+          "lens_shift_h_pct": 22,
+          "notes": ""
+        },
+        {
+          "id": "et-d75le40",
+          "model": "ET-D75LE40",
+          "name": "Long Zoom 1.72–2.43:1",
+          "category": "long",
+          "throw_ratio": [1.72, 2.43],
+          "zoom": true,
+          "lens_shift_v_up_pct": 60,
+          "lens_shift_v_down_pct": 20,
+          "lens_shift_h_pct": 22,
+          "notes": ""
+        },
+        {
+          "id": "et-d75le50",
+          "model": "ET-D75LE50",
+          "name": "Long Zoom 2.43–4.15:1",
+          "category": "long",
+          "throw_ratio": [2.43, 4.15],
+          "zoom": true,
+          "lens_shift_v_up_pct": 60,
+          "lens_shift_v_down_pct": 20,
+          "lens_shift_h_pct": 22,
+          "notes": ""
+        },
+        {
+          "id": "et-d75le90",
+          "model": "ET-D75LE90",
+          "name": "Ultra Long Zoom 4.15–7.47:1",
+          "category": "ultra-long",
+          "throw_ratio": [4.15, 7.47],
+          "zoom": true,
+          "lens_shift_v_up_pct": 60,
+          "lens_shift_v_down_pct": 20,
+          "lens_shift_h_pct": 22,
+          "notes": ""
+        }
+      ]
+    },
+
+    {
+      "id": "panasonic-pt-rz790",
+      "brand": "Panasonic",
+      "model": "PT-RZ790",
+      "native_resolution": [1920, 1200],
+      "brightness_lm": 7500,
+      "lens_mount": "ET-D75LE",
+      "notes": "WUXGA 1920×1200 laser. Same lens family as RZ990.",
+      "lenses": [
+        {
+          "id": "et-d75le6",
+          "model": "ET-D75LE6",
+          "name": "Short Fixed 0.60:1",
+          "category": "short",
+          "throw_ratio": [0.60, 0.60],
+          "zoom": false,
+          "lens_shift_v_up_pct": 67,
+          "lens_shift_v_down_pct": 17,
+          "lens_shift_h_pct": 6,
+          "notes": "Fixed lens. Limited H shift."
+        },
+        {
+          "id": "et-d75le10",
+          "model": "ET-D75LE10",
+          "name": "Short Zoom 0.78–1.0:1",
+          "category": "short",
+          "throw_ratio": [0.78, 1.00],
+          "zoom": true,
+          "lens_shift_v_up_pct": 55,
+          "lens_shift_v_down_pct": 15,
+          "lens_shift_h_pct": 22,
+          "notes": ""
+        },
+        {
+          "id": "et-d75le20",
+          "model": "ET-D75LE20",
+          "name": "Standard Zoom 1.0–1.36:1",
+          "category": "standard",
+          "throw_ratio": [1.00, 1.36],
+          "zoom": true,
+          "lens_shift_v_up_pct": 60,
+          "lens_shift_v_down_pct": 20,
+          "lens_shift_h_pct": 22,
+          "notes": ""
+        },
+        {
+          "id": "et-d75le30",
+          "model": "ET-D75LE30",
+          "name": "Standard Zoom 1.36–1.72:1",
+          "category": "standard",
+          "throw_ratio": [1.36, 1.72],
+          "zoom": true,
+          "lens_shift_v_up_pct": 60,
+          "lens_shift_v_down_pct": 20,
+          "lens_shift_h_pct": 22,
+          "notes": ""
+        },
+        {
+          "id": "et-d75le40",
+          "model": "ET-D75LE40",
+          "name": "Long Zoom 1.72–2.43:1",
+          "category": "long",
+          "throw_ratio": [1.72, 2.43],
+          "zoom": true,
+          "lens_shift_v_up_pct": 60,
+          "lens_shift_v_down_pct": 20,
+          "lens_shift_h_pct": 22,
+          "notes": ""
+        },
+        {
+          "id": "et-d75le50",
+          "model": "ET-D75LE50",
+          "name": "Long Zoom 2.43–4.15:1",
+          "category": "long",
+          "throw_ratio": [2.43, 4.15],
+          "zoom": true,
+          "lens_shift_v_up_pct": 60,
+          "lens_shift_v_down_pct": 20,
+          "lens_shift_h_pct": 22,
+          "notes": ""
+        },
+        {
+          "id": "et-d75le90",
+          "model": "ET-D75LE90",
+          "name": "Ultra Long Zoom 4.15–7.47:1",
+          "category": "ultra-long",
+          "throw_ratio": [4.15, 7.47],
+          "zoom": true,
+          "lens_shift_v_up_pct": 60,
+          "lens_shift_v_down_pct": 20,
+          "lens_shift_h_pct": 22,
+          "notes": ""
+        }
+      ]
+    },
+
+    {
+      "id": "panasonic-pt-rz660",
+      "brand": "Panasonic",
+      "model": "PT-RZ660",
+      "native_resolution": [1920, 1200],
+      "brightness_lm": 6500,
+      "lens_mount": "ET-D75LE",
+      "notes": "WUXGA 1920×1200 laser. Compatible with ET-D75LE series.",
+      "lenses": [
+        {
+          "id": "et-d75le6",
+          "model": "ET-D75LE6",
+          "name": "Short Fixed 0.60:1",
+          "category": "short",
+          "throw_ratio": [0.60, 0.60],
+          "zoom": false,
+          "lens_shift_v_up_pct": 67,
+          "lens_shift_v_down_pct": 17,
+          "lens_shift_h_pct": 6,
+          "notes": ""
+        },
+        {
+          "id": "et-d75le20",
+          "model": "ET-D75LE20",
+          "name": "Standard Zoom 1.0–1.36:1",
+          "category": "standard",
+          "throw_ratio": [1.00, 1.36],
+          "zoom": true,
+          "lens_shift_v_up_pct": 60,
+          "lens_shift_v_down_pct": 20,
+          "lens_shift_h_pct": 22,
+          "notes": ""
+        },
+        {
+          "id": "et-d75le30",
+          "model": "ET-D75LE30",
+          "name": "Standard Zoom 1.36–1.72:1",
+          "category": "standard",
+          "throw_ratio": [1.36, 1.72],
+          "zoom": true,
+          "lens_shift_v_up_pct": 60,
+          "lens_shift_v_down_pct": 20,
+          "lens_shift_h_pct": 22,
+          "notes": ""
+        },
+        {
+          "id": "et-d75le40",
+          "model": "ET-D75LE40",
+          "name": "Long Zoom 1.72–2.43:1",
+          "category": "long",
+          "throw_ratio": [1.72, 2.43],
+          "zoom": true,
+          "lens_shift_v_up_pct": 60,
+          "lens_shift_v_down_pct": 20,
+          "lens_shift_h_pct": 22,
+          "notes": ""
+        },
+        {
+          "id": "et-d75le50",
+          "model": "ET-D75LE50",
+          "name": "Long Zoom 2.43–4.15:1",
+          "category": "long",
+          "throw_ratio": [2.43, 4.15],
+          "zoom": true,
+          "lens_shift_v_up_pct": 60,
+          "lens_shift_v_down_pct": 20,
+          "lens_shift_h_pct": 22,
+          "notes": ""
+        }
+      ]
+    },
+
+    {
+      "id": "panasonic-pt-rz470",
+      "brand": "Panasonic",
+      "model": "PT-RZ470",
+      "native_resolution": [1920, 1200],
+      "brightness_lm": 4700,
+      "lens_mount": "ET-D75LE",
+      "notes": "WUXGA 1920×1200 laser.",
+      "lenses": [
+        {
+          "id": "et-d75le20",
+          "model": "ET-D75LE20",
+          "name": "Standard Zoom 1.0–1.36:1",
+          "category": "standard",
+          "throw_ratio": [1.00, 1.36],
+          "zoom": true,
+          "lens_shift_v_up_pct": 60,
+          "lens_shift_v_down_pct": 20,
+          "lens_shift_h_pct": 22,
+          "notes": ""
+        },
+        {
+          "id": "et-d75le30",
+          "model": "ET-D75LE30",
+          "name": "Standard Zoom 1.36–1.72:1",
+          "category": "standard",
+          "throw_ratio": [1.36, 1.72],
+          "zoom": true,
+          "lens_shift_v_up_pct": 60,
+          "lens_shift_v_down_pct": 20,
+          "lens_shift_h_pct": 22,
+          "notes": ""
+        }
+      ]
+    },
+
+    {
+      "_template": "Add your own projector — copy this block, fill in values, remove this key",
+      "id": "custom-example",
+      "brand": "Brand",
+      "model": "Model",
+      "native_resolution": [1920, 1200],
+      "brightness_lm": 0,
+      "lens_mount": "Mount name",
+      "notes": "",
+      "lenses": [
+        {
+          "id": "lens-id",
+          "model": "Lens Model",
+          "name": "Display name",
+          "category": "short|standard|long|ultra-long",
+          "throw_ratio": [1.0, 1.5],
+          "zoom": true,
+          "lens_shift_v_up_pct": 60,
+          "lens_shift_v_down_pct": 20,
+          "lens_shift_h_pct": 22,
+          "notes": ""
+        }
+      ]
+    }
+
+  ]
+}
